@@ -28,6 +28,11 @@ Help Options:
   -h, --help                        Show this help message
 ```
 
+## Auth (Client id and secret)
+
+Register an application at [myUplinkDEVS](https://dev.myuplink.com/login) to get
+client id and secret for your application.
+
 ## HTTP Endpoints
 
 | Endpoint   | Description                             |
