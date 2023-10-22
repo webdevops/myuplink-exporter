@@ -1,0 +1,4 @@
+/vendor/
+/myuplink-exporter
+/*.exe
+/release-assets
