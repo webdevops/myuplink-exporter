@@ -41,6 +41,15 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 	// use timeout as max cache time as mostly it's also the scrape time
 	cacheTime := time.Duration(timeoutSeconds) * time.Second
 
+	if v := r.URL.Query().Get("cache"); v != "" {
+		cacheTime, err = time.ParseDuration(v)
+		if err != nil {
+			contextLogger.Error(err.Error())
+			http.Error(w, fmt.Sprintf("failed to parse cache from query param: %s", err), http.StatusBadRequest)
+			return
+		}
+	}
+
 	metricSystem := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "myuplink_system_info",

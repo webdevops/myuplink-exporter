@@ -4,7 +4,7 @@
 [![DockerHub](https://img.shields.io/badge/DockerHub-webdevops%2Fmyuplink--exporter-blue)](https://hub.docker.com/r/webdevops/myuplink-exporter/)
 [![Quay.io](https://img.shields.io/badge/Quay.io-webdevops%2Fmyuplink--exporter-blue)](https://quay.io/repository/webdevops/myuplink-exporter)
 
-A Prometheus exporter for myuplink.com metrics
+A Prometheus exporter for myuplink.com device metrics
 
 Usage
 -----
@@ -28,16 +28,21 @@ Help Options:
   -h, --help                        Show this help message
 ```
 
-HTTP Endpoints
---------------
+## HTTP Endpoints
 
 | Endpoint   | Description                             |
 |------------|-----------------------------------------|
 | `/metrics` | Default prometheus golang metrics       |
 | `/probe`   | Probe devices metrics from myuplink.com |
 
-Metrics
--------
+### `/probe`
+
+| GET parameter | Default                   | Required | Multiple | Description                                     |
+|---------------|---------------------------|----------|----------|-------------------------------------------------|
+| `cache`       |                           | no       | no       | Cache time in time.Duration (eg. `30s` or `5m`) |
+
+
+## Metrics
 
 | Metric                                 | Description                              |
 |----------------------------------------|------------------------------------------|
