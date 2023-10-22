@@ -18,8 +18,8 @@ type (
 			Url string `long:"myuplink.url" env:"MYUPLINK_URL" description:"Url to myUplink API" default:"https://api.myuplink.com"`
 
 			Auth struct {
-				ClientID     string `long:"myuplink.auth.clientid"      env:"MYUPLINK_AUTH_CLIENTID"      description:"ClientID from myUplink"`
-				ClientSecret string `long:"myuplink.auth.clientsecret"  env:"MYUPLINK_AUTH_CLIENTSECRET"  description:"ClientSecret from myUplink" json:"-"`
+				ClientID     string `long:"myuplink.auth.clientid"      env:"MYUPLINK_AUTH_CLIENTID"      description:"ClientID from myUplink" required:"yes"`
+				ClientSecret string `long:"myuplink.auth.clientsecret"  env:"MYUPLINK_AUTH_CLIENTSECRET"  description:"ClientSecret from myUplink" json:"-"  required:"yes"`
 			}
 		}
 
