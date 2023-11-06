@@ -42,7 +42,7 @@ type (
 		ParameterUnit       string    `json:"parameterUnit"`
 		Writable            bool      `json:"writable"`
 		Timestamp           time.Time `json:"timestamp"`
-		Value               float64   `json:"value"`
+		Value               *float64  `json:"value"`
 		StrVal              string    `json:"strVal"`
 		SmartHomeCategories []string  `json:"smartHomeCategories"`
 		MinValue            float64   `json:"minValue"`

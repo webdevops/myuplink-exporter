@@ -120,14 +120,16 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 			}
 
 			for _, devicePoint := range *devicePoints.(*myuplink.SystemDevicePoints) {
-				metricSystemDevicePoint.With(prometheus.Labels{
-					"systemID":      system.SystemID,
-					"deviceID":      device.ID,
-					"category":      devicePoint.Category,
-					"parameterID":   devicePoint.ParameterID,
-					"parameterName": devicePoint.ParameterName,
-					"parameterUnit": devicePoint.ParameterUnit,
-				}).Set(devicePoint.Value)
+				if devicePoint.Value != nil {
+					metricSystemDevicePoint.With(prometheus.Labels{
+						"systemID":      system.SystemID,
+						"deviceID":      device.ID,
+						"category":      devicePoint.Category,
+						"parameterID":   devicePoint.ParameterID,
+						"parameterName": devicePoint.ParameterName,
+						"parameterUnit": devicePoint.ParameterUnit,
+					}).Set(*devicePoint.Value)
+				}
 			}
 		}
 	}
