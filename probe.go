@@ -50,32 +50,7 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	metricSystem := prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "myuplink_system_info",
-			Help: "",
-		},
-		[]string{"systemID", "systemName", "country"},
-	)
-	registry.MustRegister(metricSystem)
-
-	metricSystemDevice := prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "myuplink_system_device_info",
-			Help: "",
-		},
-		[]string{"systemID", "deviceID", "deviceName", "serialNumber", "connectionState", "firmwareVersion"},
-	)
-	registry.MustRegister(metricSystemDevice)
-
-	metricSystemDevicePoint := prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "myuplink_system_device_point",
-			Help: "",
-		},
-		[]string{"systemID", "deviceID", "category", "parameterID", "parameterName", "parameterUnit"},
-	)
-	registry.MustRegister(metricSystemDevicePoint)
+	metrics := NewMyUplinkMetrics(registry)
 
 	systemList, err := cacheResult(
 		"systems",
@@ -90,14 +65,14 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, system := range systemList.(*myuplink.ResultSystems).Systems {
-		metricSystem.With(prometheus.Labels{
+		metrics.system.With(prometheus.Labels{
 			"systemID":   system.SystemID,
 			"systemName": system.Name,
 			"country":    system.Country,
 		}).Set(1)
 
 		for _, device := range system.Devices {
-			metricSystemDevice.With(prometheus.Labels{
+			metrics.systemDevice.With(prometheus.Labels{
 				"systemID":        system.SystemID,
 				"deviceID":        device.ID,
 				"deviceName":      device.Product.Name,
@@ -121,7 +96,7 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 
 			for _, devicePoint := range *devicePoints.(*myuplink.SystemDevicePoints) {
 				if devicePoint.Value != nil {
-					metricSystemDevicePoint.With(prometheus.Labels{
+					metrics.systemDevicePoint.With(prometheus.Labels{
 						"systemID":      system.SystemID,
 						"deviceID":      device.ID,
 						"category":      devicePoint.Category,
@@ -129,6 +104,24 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 						"parameterName": devicePoint.ParameterName,
 						"parameterUnit": devicePoint.ParameterUnit,
 					}).Set(*devicePoint.Value)
+
+					enumValue := fmt.Sprintf("%d", int64(*devicePoint.Value))
+					for _, enumVal := range devicePoint.EnumValues {
+						enumMetricVal := float64(0)
+						if enumVal.Value == enumValue {
+							enumMetricVal = 1
+						}
+
+						metrics.systemDevicePointEnum.With(prometheus.Labels{
+							"systemID":      system.SystemID,
+							"deviceID":      device.ID,
+							"category":      devicePoint.Category,
+							"parameterID":   devicePoint.ParameterID,
+							"parameterName": devicePoint.ParameterName,
+							"parameterUnit": devicePoint.ParameterUnit,
+							"valueText":     enumVal.Text,
+						}).Set(enumMetricVal)
+					}
 				}
 			}
 		}
