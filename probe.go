@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -67,18 +68,18 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 	for _, system := range systemList.(*myuplink.ResultSystems).Systems {
 		metrics.system.With(prometheus.Labels{
 			"systemID":   system.SystemID,
-			"systemName": system.Name,
-			"country":    system.Country,
+			"systemName": clearText(system.Name),
+			"country":    clearText(system.Country),
 		}).Set(1)
 
 		for _, device := range system.Devices {
 			metrics.systemDevice.With(prometheus.Labels{
 				"systemID":        system.SystemID,
 				"deviceID":        device.ID,
-				"deviceName":      device.Product.Name,
-				"serialNumber":    device.Product.SerialNumber,
-				"connectionState": device.ConnectionState,
-				"firmwareVersion": device.CurrentFwVersion,
+				"deviceName":      clearText(device.Product.Name),
+				"serialNumber":    clearText(device.Product.SerialNumber),
+				"connectionState": clearText(device.ConnectionState),
+				"firmwareVersion": clearText(device.CurrentFwVersion),
 			}).Set(1)
 
 			devicePoints, err := cacheResultWithDuration(
@@ -99,10 +100,10 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 					metrics.systemDevicePoint.With(prometheus.Labels{
 						"systemID":      system.SystemID,
 						"deviceID":      device.ID,
-						"category":      devicePoint.Category,
+						"category":      clearText(devicePoint.Category),
 						"parameterID":   devicePoint.ParameterID,
-						"parameterName": devicePoint.ParameterName,
-						"parameterUnit": devicePoint.ParameterUnit,
+						"parameterName": clearText(devicePoint.ParameterName),
+						"parameterUnit": clearText(devicePoint.ParameterUnit),
 					}).Set(*devicePoint.Value)
 
 					enumValue := fmt.Sprintf("%d", int64(*devicePoint.Value))
@@ -115,11 +116,11 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 						metrics.systemDevicePointEnum.With(prometheus.Labels{
 							"systemID":      system.SystemID,
 							"deviceID":      device.ID,
-							"category":      devicePoint.Category,
+							"category":      clearText(devicePoint.Category),
 							"parameterID":   devicePoint.ParameterID,
-							"parameterName": devicePoint.ParameterName,
-							"parameterUnit": devicePoint.ParameterUnit,
-							"valueText":     enumVal.Text,
+							"parameterName": clearText(devicePoint.ParameterName),
+							"parameterUnit": clearText(devicePoint.ParameterUnit),
+							"valueText":     clearText(enumVal.Text),
 						}).Set(enumMetricVal)
 					}
 				}
@@ -179,4 +180,13 @@ func cacheResultWithDuration(cacheKey string, cacheTime time.Duration, callback 
 	globalCache.Set(cacheKey, ret, cacheTime)
 
 	return ret, nil
+}
+
+func clearText(val string) string {
+	// remove soft hyphen
+	val = strings.ReplaceAll(val, "\u00AD", "")
+	// remove possible space chars
+	val = strings.TrimSpace(val)
+
+	return val
 }
