@@ -73,6 +73,11 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 		}).Set(1)
 
 		for _, device := range system.Devices {
+			if !device.IsConnectionStateAllowed(opts.MyUplink.Device.AllowedConnectionStates) {
+				contextLogger.Warnf(`ignoring system "%s" device "%s", connection state is "%s"`, system.Name, device.ID, device.ConnectionState)
+				continue
+			}
+
 			metrics.systemDevice.With(prometheus.Labels{
 				"systemID":        system.SystemID,
 				"deviceID":        device.ID,

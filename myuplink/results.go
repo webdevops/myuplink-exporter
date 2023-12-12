@@ -1,6 +1,7 @@
 package myuplink
 
 import (
+	"strings"
 	"time"
 )
 
@@ -10,21 +11,23 @@ type (
 		ItemsPerPage int `json:"itemsPerPage"`
 		NumItems     int `json:"numItems"`
 		Systems      []struct {
-			SystemID      string `json:"systemId"`
-			Name          string `json:"name"`
-			SecurityLevel string `json:"securityLevel"`
-			HasAlarm      bool   `json:"hasAlarm"`
-			Country       string `json:"country"`
-			Devices       []struct {
-				ID               string `json:"id"`
-				ConnectionState  string `json:"connectionState"`
-				CurrentFwVersion string `json:"currentFwVersion"`
-				Product          struct {
-					SerialNumber string `json:"serialNumber"`
-					Name         string `json:"name"`
-				} `json:"product"`
-			} `json:"devices"`
+			SystemID      string         `json:"systemId"`
+			Name          string         `json:"name"`
+			SecurityLevel string         `json:"securityLevel"`
+			HasAlarm      bool           `json:"hasAlarm"`
+			Country       string         `json:"country"`
+			Devices       []SystemDevice `json:"devices"`
 		} `json:"systems"`
+	}
+
+	SystemDevice struct {
+		ID               string `json:"id"`
+		ConnectionState  string `json:"connectionState"`
+		CurrentFwVersion string `json:"currentFwVersion"`
+		Product          struct {
+			SerialNumber string `json:"serialNumber"`
+			Name         string `json:"name"`
+		} `json:"product"`
 	}
 
 	SystemDeviceFirmwareInfo struct {
@@ -57,3 +60,13 @@ type (
 		ZoneID     string `json:"zoneId"`
 	}
 )
+
+func (d *SystemDevice) IsConnectionStateAllowed(allowedValues []string) bool {
+	for _, allowedVal := range allowedValues {
+		if strings.EqualFold(d.ConnectionState, allowedVal) {
+			return true
+		}
+	}
+
+	return false
+}

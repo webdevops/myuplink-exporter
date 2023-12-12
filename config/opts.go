@@ -21,6 +21,10 @@ type (
 				ClientID     string `long:"myuplink.auth.clientid"      env:"MYUPLINK_AUTH_CLIENTID"      description:"ClientID from myUplink" required:"yes"`
 				ClientSecret string `long:"myuplink.auth.clientsecret"  env:"MYUPLINK_AUTH_CLIENTSECRET"  description:"ClientSecret from myUplink" json:"-"  required:"yes"`
 			}
+
+			Device struct {
+				AllowedConnectionStates []string `long:"myuplink.device.allowed-connectionstates"  env:"MYUPLINK_DEVICE_ALLOWED_CONNECTIONSTATES"  env-delim:"," description:"Allowed device connection states" default:"Connected"`
+			}
 		}
 
 		// general options
