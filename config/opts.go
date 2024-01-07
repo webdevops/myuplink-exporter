@@ -24,6 +24,7 @@ type (
 
 			Device struct {
 				AllowedConnectionStates []string `long:"myuplink.device.allowed-connectionstates"  env:"MYUPLINK_DEVICE_ALLOWED_CONNECTIONSTATES"  env-delim:"," description:"Allowed device connection states" default:"Connected"`
+				CalcTotalParameters     []string `long:"myuplink.device.calc-total-parameters"  env:"MYUPLINK_DEVICE_CALC_TOTAL_PARAMETRS"  env-delim:"," description:"Calculate total metrics for these parameters (eg. energey log parameters)"`
 			}
 		}
 

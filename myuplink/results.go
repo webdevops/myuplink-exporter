@@ -38,7 +38,7 @@ type (
 		DesiredFwVersion string `json:"desiredFwVersion"`
 	}
 
-	SystemDevicePoints []struct {
+	SystemDevicePoint struct {
 		Category            string    `json:"category"`
 		ParameterID         string    `json:"parameterId"`
 		ParameterName       string    `json:"parameterName"`
@@ -59,6 +59,8 @@ type (
 		ScaleValue string `json:"scaleValue"`
 		ZoneID     string `json:"zoneId"`
 	}
+
+	SystemDevicePoints []SystemDevicePoint
 )
 
 func (d *SystemDevice) IsConnectionStateAllowed(allowedValues []string) bool {

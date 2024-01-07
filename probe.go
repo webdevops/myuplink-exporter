@@ -111,6 +111,7 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 						"parameterUnit": clearText(devicePoint.ParameterUnit),
 					}).Set(*devicePoint.Value)
 
+					// enum translation
 					enumValue := fmt.Sprintf("%d", int64(*devicePoint.Value))
 					for _, enumVal := range devicePoint.EnumValues {
 						enumMetricVal := float64(0)
@@ -127,6 +128,20 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 							"parameterUnit": clearText(devicePoint.ParameterUnit),
 							"valueText":     clearText(enumVal.Text),
 						}).Set(enumMetricVal)
+					}
+
+					// total values (counters)
+					for _, totalParameterID := range opts.MyUplink.Device.CalcTotalParameters {
+						if strings.EqualFold(devicePoint.ParameterID, totalParameterID) {
+							metrics.systemDevicePointTotal.With(prometheus.Labels{
+								"systemID":      system.SystemID,
+								"deviceID":      device.ID,
+								"category":      clearText(devicePoint.Category),
+								"parameterID":   devicePoint.ParameterID,
+								"parameterName": clearText(devicePoint.ParameterName),
+								"parameterUnit": clearText(devicePoint.ParameterUnit),
+							}).Set(totalParamCache.getParameterValue(device.ID, devicePoint.ParameterID, devicePoint))
+						}
 					}
 				}
 			}

@@ -43,6 +43,7 @@ func main() {
 	logger.Info(string(opts.GetJson()))
 
 	globalCache = cache.New(60*time.Minute, 1*time.Minute)
+	totalParamCache.Init()
 
 	logger.Infof("connecting to myUplink")
 	myuplinkClient = myuplink.NewClient(logger)

@@ -6,15 +6,18 @@ import (
 
 type (
 	MyUplinkMetrics struct {
-		system                *prometheus.GaugeVec
-		systemDevice          *prometheus.GaugeVec
-		systemDevicePoint     *prometheus.GaugeVec
-		systemDevicePointEnum *prometheus.GaugeVec
+		system                 *prometheus.GaugeVec
+		systemDevice           *prometheus.GaugeVec
+		systemDevicePoint      *prometheus.GaugeVec
+		systemDevicePointEnum  *prometheus.GaugeVec
+		systemDevicePointTotal *prometheus.GaugeVec
 	}
 )
 
 func NewMyUplinkMetrics(registry *prometheus.Registry) *MyUplinkMetrics {
 	metrics := &MyUplinkMetrics{}
+
+	pointLabels := []string{"systemID", "deviceID", "category", "parameterID", "parameterName", "parameterUnit"}
 
 	metrics.system = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -39,7 +42,7 @@ func NewMyUplinkMetrics(registry *prometheus.Registry) *MyUplinkMetrics {
 			Name: "myuplink_system_device_point",
 			Help: "myUplink device metric point",
 		},
-		[]string{"systemID", "deviceID", "category", "parameterID", "parameterName", "parameterUnit"},
+		pointLabels,
 	)
 	registry.MustRegister(metrics.systemDevicePoint)
 
@@ -48,9 +51,18 @@ func NewMyUplinkMetrics(registry *prometheus.Registry) *MyUplinkMetrics {
 			Name: "myuplink_system_device_point_enum",
 			Help: "myUplink device metric point enum value",
 		},
-		[]string{"systemID", "deviceID", "category", "parameterID", "parameterName", "parameterUnit", "valueText"},
+		append(pointLabels, "valueText"),
 	)
 	registry.MustRegister(metrics.systemDevicePointEnum)
+
+	metrics.systemDevicePointTotal = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "myuplink_system_device_point_total",
+			Help: "myUplink device metric point total",
+		},
+		pointLabels,
+	)
+	registry.MustRegister(metrics.systemDevicePointTotal)
 
 	return metrics
 }
