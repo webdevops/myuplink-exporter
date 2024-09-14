@@ -24,7 +24,7 @@ const (
 
 var (
 	argparser *flags.Parser
-	opts      config.Opts
+	Opts      config.Opts
 
 	myuplinkClient *myuplink.Client
 
@@ -40,28 +40,29 @@ func main() {
 	initLogger()
 
 	logger.Infof("starting myuplink-plug-exporter v%s (%s; %s; by %v)", gitTag, gitCommit, runtime.Version(), Author)
-	logger.Info(string(opts.GetJson()))
+	logger.Info(string(Opts.GetJson()))
+	initSystem()
 
 	globalCache = cache.New(60*time.Minute, 1*time.Minute)
 	totalParamCache.Init()
 
 	logger.Infof("connecting to myUplink")
 	myuplinkClient = myuplink.NewClient(logger)
-	myuplinkClient.SetDebugMode(opts.Logger.Development)
-	myuplinkClient.SetApiUrl(opts.MyUplink.Url)
+	myuplinkClient.SetDebugMode(Opts.Logger.Development)
+	myuplinkClient.SetApiUrl(Opts.MyUplink.Url)
 	myuplinkClient.SetUserAgent(UserAgent + gitTag)
-	myuplinkClient.SetAuth(opts.MyUplink.Auth.ClientID, opts.MyUplink.Auth.ClientSecret)
+	myuplinkClient.SetAuth(Opts.MyUplink.Auth.ClientID, Opts.MyUplink.Auth.ClientSecret)
 	if err := myuplinkClient.Connect(context.Background()); err != nil {
 		logger.Fatal(err)
 	}
 
-	logger.Infof("starting http server on %s", opts.Server.Bind)
+	logger.Infof("starting http server on %s", Opts.Server.Bind)
 	startHttpServer()
 }
 
 // init argparser and parse/validate arguments
 func initArgparser() {
-	argparser = flags.NewParser(&opts, flags.Default)
+	argparser = flags.NewParser(&Opts, flags.Default)
 	_, err := argparser.Parse()
 
 	// check if there is an parse error
@@ -99,10 +100,10 @@ func startHttpServer() {
 	mux.HandleFunc("/probe", myuplinkProbe)
 
 	srv := &http.Server{
-		Addr:         opts.Server.Bind,
+		Addr:         Opts.Server.Bind,
 		Handler:      mux,
-		ReadTimeout:  opts.Server.ReadTimeout,
-		WriteTimeout: opts.Server.WriteTimeout,
+		ReadTimeout:  Opts.Server.ReadTimeout,
+		WriteTimeout: Opts.Server.WriteTimeout,
 	}
 	logger.Fatal(srv.ListenAndServe())
 }
