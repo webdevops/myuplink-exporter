@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"
+	resty "resty.dev/v3"
 )
 
 type (
@@ -30,6 +30,7 @@ func NewClient(logger *zap.SugaredLogger) *Client {
 	c.http.SetRetryCount(5)
 	c.http.SetRetryWaitTime(5 * time.Second)
 	c.http.SetRetryMaxWaitTime(30 * time.Second)
+	c.http.EnableRetryDefaultConditions()
 
 	return &c
 }
