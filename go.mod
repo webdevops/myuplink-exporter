@@ -10,7 +10,7 @@ require (
 	github.com/prometheus/client_golang v1.22.0
 	github.com/webdevops/go-common v0.0.0-20250501164923-7cab87d11d0f
 	go.uber.org/zap v1.27.0
-	resty.dev/v3 v3.0.0-beta.2
+	resty.dev/v3 v3.0.0-beta.3
 )
 
 require (
