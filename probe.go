@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -10,7 +11,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.uber.org/zap"
+	"github.com/webdevops/go-common/log/slogger"
 
 	"github.com/webdevops/myuplink-exporter/myuplink"
 )
@@ -152,8 +153,14 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 	h.ServeHTTP(w, r)
 }
 
-func buildContextLoggerFromRequest(r *http.Request) *zap.SugaredLogger {
-	return logger.With(zap.String("requestPath", r.URL.Path))
+func buildContextLoggerFromRequest(r *http.Request) *slogger.Logger {
+	return logger.With(
+		slog.Group(
+			"request",
+			slog.String("host", r.Host),
+			slog.String("path", r.URL.Path),
+		),
+	)
 }
 
 func getPrometheusTimeout(r *http.Request, defaultTimeout float64) (timeout float64, err error) {

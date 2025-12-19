@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"runtime"
@@ -33,13 +34,14 @@ var (
 	// Git version information
 	gitCommit = "<unknown>"
 	gitTag    = "<unknown>"
+	buildDate = "<unknown>"
 )
 
 func main() {
 	initArgparser()
 	initLogger()
 
-	logger.Infof("starting myuplink-plug-exporter v%s (%s; %s; by %v)", gitTag, gitCommit, runtime.Version(), Author)
+	logger.Infof("starting myuplink-plug-exporter v%s (%s; %s; by %v at %v)", gitTag, gitCommit, runtime.Version(), Author, buildDate)
 	logger.Info(string(Opts.GetJson()))
 	initSystem()
 
@@ -48,12 +50,12 @@ func main() {
 
 	logger.Infof("connecting to myUplink")
 	myuplinkClient = myuplink.NewClient(logger)
-	myuplinkClient.SetDebugMode(Opts.Logger.Development)
+	myuplinkClient.SetDebugMode(Opts.Logger.Level == "trace")
 	myuplinkClient.SetApiUrl(Opts.MyUplink.Url)
 	myuplinkClient.SetUserAgent(UserAgent + gitTag)
 	myuplinkClient.SetAuth(Opts.MyUplink.Auth.ClientID, Opts.MyUplink.Auth.ClientSecret)
 	if err := myuplinkClient.Connect(context.Background()); err != nil {
-		logger.Fatal(err)
+		logger.Fatal("failed to connect to myuplink", slog.Any("error", err))
 	}
 
 	logger.Infof("starting http server on %s", Opts.Server.Bind)
@@ -85,14 +87,14 @@ func startHttpServer() {
 	// healthz
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		if _, err := fmt.Fprint(w, "Ok"); err != nil {
-			logger.Error(err)
+			logger.Error(err.Error())
 		}
 	})
 
 	// readyz
 	mux.HandleFunc("/readyz", func(w http.ResponseWriter, r *http.Request) {
 		if _, err := fmt.Fprint(w, "Ok"); err != nil {
-			logger.Error(err)
+			logger.Error(err.Error())
 		}
 	})
 
@@ -105,5 +107,7 @@ func startHttpServer() {
 		ReadTimeout:  Opts.Server.ReadTimeout,
 		WriteTimeout: Opts.Server.WriteTimeout,
 	}
-	logger.Fatal(srv.ListenAndServe())
+	if err := srv.ListenAndServe(); err != nil {
+		logger.Fatal(err.Error())
+	}
 }

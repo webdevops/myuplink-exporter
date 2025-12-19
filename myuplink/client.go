@@ -3,15 +3,16 @@ package myuplink
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
-	"go.uber.org/zap"
+	"github.com/webdevops/go-common/log/slogger"
 	resty "resty.dev/v3"
 )
 
 type (
 	Client struct {
-		logger *zap.SugaredLogger
+		logger *slogger.Logger
 		http   *resty.Client
 
 		clientId     string
@@ -21,7 +22,7 @@ type (
 	}
 )
 
-func NewClient(logger *zap.SugaredLogger) *Client {
+func NewClient(logger *slogger.Logger) *Client {
 	c := Client{
 		logger: logger,
 		http:   resty.New(),
@@ -85,7 +86,7 @@ func (c *Client) Connect(ctx context.Context) error {
 func (c *Client) createRequest(ctx context.Context) *resty.Request {
 	if c.token.IsExpired() {
 		if err := c.Connect(ctx); err != nil {
-			c.logger.Fatalf(`unable to refresh auth token: %v`, err)
+			c.logger.Fatal(`unable to refresh auth token`, slog.Any("error", err))
 		}
 
 	}
@@ -113,7 +114,7 @@ func (c *Client) GetSystems(ctx context.Context) (*ResultSystems, error) {
 func (c *Client) GetSystemDevicePoints(ctx context.Context, deviceId string) (*SystemDevicePoints, error) {
 	result := &SystemDevicePoints{}
 
-	c.logger.With(zap.String("deviceID", deviceId)).Debug(`fetch myUplink device points`)
+	c.logger.Debug(`fetch myUplink device points`, slog.String("deviceID", deviceId))
 
 	resp, err := c.createRequest(ctx).SetResult(result).Get(fmt.Sprintf("/v2/devices/%s/points", deviceId))
 	if err != nil {
@@ -130,7 +131,7 @@ func (c *Client) GetSystemDevicePoints(ctx context.Context, deviceId string) (*S
 func (c *Client) GetSystemDeviceFirmware(ctx context.Context, deviceId string) (*SystemDeviceFirmwareInfo, error) {
 	result := &SystemDeviceFirmwareInfo{}
 
-	c.logger.Debugf(`fetch myUplink device firmware info for "%v"`, deviceId)
+	c.logger.Debug(`fetch myUplink device firmware info`, slog.String("deviceID", deviceId))
 
 	resp, err := c.createRequest(ctx).SetResult(result).Get(fmt.Sprintf("/v2/devices/%s/firmware-info", deviceId))
 	if err != nil {
