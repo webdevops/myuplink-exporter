@@ -31,7 +31,7 @@ func NewClient(logger *slogger.Logger) *Client {
 	c.http.SetRetryCount(5)
 	c.http.SetRetryWaitTime(5 * time.Second)
 	c.http.SetRetryMaxWaitTime(30 * time.Second)
-	c.http.EnableRetryDefaultConditions()
+	c.http.SetRetryDefaultConditions(true)
 
 	return &c
 }
@@ -74,7 +74,7 @@ func (c *Client) Connect(ctx context.Context) error {
 		return err
 	}
 
-	if !resp.IsSuccess() {
+	if !resp.IsStatusSuccess() {
 		return fmt.Errorf(`unable to login to myUplink, expected status code 200, got %v`, resp.Status())
 	}
 
@@ -104,7 +104,7 @@ func (c *Client) GetSystems(ctx context.Context) (*ResultSystems, error) {
 		return nil, err
 	}
 
-	if !resp.IsSuccess() {
+	if !resp.IsStatusSuccess() {
 		return nil, fmt.Errorf(`unable to fetch system list from myUplink, expected status code 200, got %v`, resp.Status())
 	}
 
@@ -121,7 +121,7 @@ func (c *Client) GetSystemDevicePoints(ctx context.Context, deviceId string) (*S
 		return nil, err
 	}
 
-	if !resp.IsSuccess() {
+	if !resp.IsStatusSuccess() {
 		return nil, fmt.Errorf(`unable to fetch device points from myUplink, expected status code 200, got %v`, resp.Status())
 	}
 
@@ -138,7 +138,7 @@ func (c *Client) GetSystemDeviceFirmware(ctx context.Context, deviceId string) (
 		return nil, err
 	}
 
-	if !resp.IsSuccess() {
+	if !resp.IsStatusSuccess() {
 		return nil, fmt.Errorf(`unable to fetch device firmware info from myUplink, expected status code 200, got %v`, resp.Status())
 	}
 
